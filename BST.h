@@ -38,7 +38,8 @@ template <class T> class Bst : public Node<T> {
 	private:
 		Node<T> *root = NULL;
 		int nodesCount = 0;
-		bool find(Node<T>* node, T key);
+		bool find(Node<T>* node, T data);
+		bool remove(Node<T>* node, T data);
 		
 		Node<T> *getMin(Node<T> *node);
 		int height(Node<T> *node);
@@ -52,7 +53,18 @@ template <class T> class Bst : public Node<T> {
 		int size()                      {  return nodesCount;       }
 		bool isEmpty()                  {  return (!nodesCount);    }
 		bool add(T data);
-		bool remove(T data);
+		
+		bool remove(T data){
+			// Check if the value exists in this
+			// binary tree, if it does not return false
+			if(find(data)){
+				return remove(root, data);
+			}
+			// Otherwise remove this element from the binary search tree
+			else{
+				return false;
+			}
+		}
 		
 		bool find(T data){
 			if(isEmpty()){
@@ -147,109 +159,98 @@ template <class T> bool Bst<T>::add(T data){
 
 
 // Remove a value from this binary tree if it exists, O(n)
-template <class T> bool Bst<T>::remove(T data){
-	
-	// Check if the value exists in this
-    // binary tree, if it does not return false
-    if(find(data) == false){
-		return false;
-	}
-	
-	// Otherwise remove this element from the binary search tree
-	else{
+template <class T> bool Bst<T>::remove(Node<T>* temp, T data){
 		
-		// search for the node having key equal to node to be removed
-		Node<T> *temp = root;
-		Node<T> *prev = NULL;
-		while(temp->key != data){
-			prev = temp;
-			if(temp->key > data){
-				
-				// Dig into left subtree, the value we're looking
-				// for is smaller than the current value
-				
-				temp = temp->left;
-			}
-			else{
-				
-				// Dig into right subtree, the value we're looking
-				// for is greater than the current value
-      
-				temp = temp->right;
-			}
-		}
-
-		// Found the node we wish to remove
-		
-		
-		if(temp->left == NULL){
+	// search for the node having key equal to node to be removed
+	Node<T> *prev = NULL;
+	while(temp->key != data){
+		prev = temp;
+		if(temp->key > data){
 			
-
-			// This is the case with only a right subtree or
-			// no subtree at all. In this situation just
-			// swap the node we wish to remove with its right child.
-			if(temp == root){
-				if(root->right != NULL){
-					root = root->right;
-				}
-				else root = NULL;
-			}
-			else if(temp->right != NULL){
-				if(prev->key > data){
-					prev->left = temp->right;
-				}
-				else{
-					prev->right = temp->right;
-				}
-			}
-			else{
-				if(prev->key > data){
-					prev->left = NULL;
-				}
-				else{
-					prev->right = NULL;
-				}
-			}
-			delete temp;
-		}
-		
-		
-		else if(temp->right == NULL){
+			// Dig into left subtree, the value we're looking
+			// for is smaller than the current value
 			
-			// This is the case with only a left subtree
-			// swap the node we wish to remove with its left child.
-			
-			if(temp == root){
-				root = root->left;
-			}
-			else{
-				if(prev->key > data){
-					prev->left = temp->left;
-				}
-				else{
-					prev->right = temp->left;
-				}
-			}
-			delete temp;
+			temp = temp->left;
 		}
 		else{
 			
-			// When removing a node from a binary tree with two links the
-			// successor of the node being removed can either be the largest
-			// value in the left subtree or the smallest value in the right
-			// subtree. In this implementation I have decided to find the
-			// smallest value in the right subtree which can be found by
-			// traversing as far left as possible in the right subtree.
-			
-			Node<T> *change = getMin(temp->right);
-			T tempkey = change->key;
-			change->key = data;
-			temp->key = tempkey;
-			remove(data);
+			// Dig into right subtree, the value we're looking
+			// for is greater than the current value
+  
+			temp = temp->right;
 		}
-		nodesCount--;
-		return true;
 	}
+
+	// Found the node we wish to remove
+	
+	
+	if(temp->left == NULL){
+		
+
+		// This is the case with only a right subtree or
+		// no subtree at all. In this situation just
+		// swap the node we wish to remove with its right child.
+		if(temp == root){
+			if(root->right != NULL){
+				root = root->right;
+			}
+			else root = NULL;
+		}
+		else if(temp->right != NULL){
+			if(prev->key > data){
+				prev->left = temp->right;
+			}
+			else{
+				prev->right = temp->right;
+			}
+		}
+		else{
+			if(prev->key > data){
+				prev->left = NULL;
+			}
+			else{
+				prev->right = NULL;
+			}
+		}
+		delete temp;
+	}
+	
+	
+	else if(temp->right == NULL){
+		
+		// This is the case with only a left subtree
+		// swap the node we wish to remove with its left child.
+		
+		if(temp == root){
+			root = root->left;
+		}
+		else{
+			if(prev->key > data){
+				prev->left = temp->left;
+			}
+			else{
+				prev->right = temp->left;
+			}
+		}
+		delete temp;
+	}
+	else{
+		
+		// When removing a node from a binary tree with two links the
+		// successor of the node being removed can either be the largest
+		// value in the left subtree or the smallest value in the right
+		// subtree. In this implementation I have decided to find the
+		// smallest value in the right subtree which can be found by
+		// traversing as far left as possible in the right subtree.
+		
+		Node<T> *change = getMin(temp->right);
+		T tempkey = change->key;
+		change->key = data;
+		temp->key = tempkey;
+		remove(temp->right, data);
+	}
+	nodesCount--;
+	return true;
 }
 
 
